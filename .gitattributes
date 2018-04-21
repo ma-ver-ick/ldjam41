@@ -9,3 +9,4 @@
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.spm filter=lfs diff=lfs merge=lfs -text
 unity/Assets/New[[:space:]]Terrain.asset filter=lfs diff=lfs merge=lfs -text
+unity/Assets/TextMesh[[:space:]]Pro/Resources/Fonts[[:space:]]&[[:space:]]Materials/LiberationSans[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text

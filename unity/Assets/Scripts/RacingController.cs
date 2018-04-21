@@ -1,0 +1,141 @@
+﻿using System;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityStandardAssets.Vehicles.Car;
+
+namespace ldjam41 {
+    // Countdown -> Racing
+    public class RacingController : MonoBehaviour {
+        public RacingState CurrentState;
+
+        public RacingState StateCountdown;
+        public RacingState StateRacing;
+
+        public CarUserControl CarUserControl;
+        public TextMeshProUGUI InfoDisplay;
+        public TextMeshProUGUI TimeDisplay;
+
+        private void Start() {
+            CurrentState = StateCountdown = new RacingStateCountdown();
+            CurrentState.Start(this);
+
+            StateRacing = new RacingStateRacing();
+
+            InfoDisplay.text = "";
+            TimeDisplay.text = "";
+        }
+
+        private void Update() {
+            CurrentState.Update(this);
+        }
+
+        public void SwitchToRacing() {
+            CurrentState = StateRacing;
+            CurrentState.Start(this);
+        }
+
+        public void OnStartFinishTrigger() {
+            CurrentState.OnStartFinishTrigger(this);
+        }
+    }
+
+    public abstract class RacingState {
+        public abstract void Start(RacingController controller);
+
+        public abstract void Update(RacingController controller);
+
+        public virtual void OnStartFinishTrigger(RacingController controller) { }
+    }
+
+    public class RacingStateCountdown : RacingState {
+        public int CountdownFrom = 3;
+        public int CurrentCountdown;
+        public float TimeCountdownStarted;
+
+        public override void Update(RacingController controller) {
+            CurrentCountdown = CountdownFrom - Mathf.FloorToInt(Time.time - TimeCountdownStarted);
+
+            controller.InfoDisplay.text = "" + CurrentCountdown + "";
+
+            if (CurrentCountdown <= 0) {
+                controller.InfoDisplay.text = "";
+                controller.SwitchToRacing();
+            }
+        }
+
+        public override void Start(RacingController controller) {
+            controller.InfoDisplay.text = "";
+            TimeCountdownStarted = Time.time;
+            CurrentCountdown = CountdownFrom;
+            controller.CarUserControl.enabled = false;
+        }
+    }
+
+    public class RacingStateRacing : RacingState {
+        public List<RoundInformation> Rounds;
+        public RoundInformation CurrentRound;
+
+        public override void Start(RacingController controller) {
+            Rounds = new List<RoundInformation>();
+            CurrentRound = new RoundInformation();
+            controller.CarUserControl.enabled = true;
+        }
+
+        public override void Update(RacingController controller) {
+            var currentTime = FloatToRaceTime(CurrentRound.Duration());
+
+            var lastTimes = "";
+            for (var i = Rounds.Count-1; i >= Math.Max(Rounds.Count - 3, 0); i--) {
+                var r = Rounds[i];
+                lastTimes += FloatToRaceTime(r.Duration()) + "\n";
+            }
+
+            var timeDisplay = currentTime + "\n<size=50%>";
+            timeDisplay += lastTimes;
+            timeDisplay += "</size>";
+
+            controller.TimeDisplay.text = timeDisplay;
+        }
+
+        public static string FloatToRaceTime(TimeSpan time) {
+            var minutes = time.Minutes; //Mathf.FloorToInt(time / 60.0f);
+            var seconds = time.Seconds; //Mathf.FloorToInt(time - minutes * 60);
+            var millis = time.Milliseconds; //Mathf.FloorToInt(time - seconds * 60 - minutes * 60);
+
+            return minutes.ToString("00") + ":" + seconds.ToString("00") + "." + millis.ToString("000");
+        }
+
+        public override void OnStartFinishTrigger(RacingController controller) {
+            CurrentRound.Stop();
+            Rounds.Add(CurrentRound);
+            CurrentRound = new RoundInformation();
+        }
+    }
+
+    public class RoundInformation {
+        private readonly System.Diagnostics.Stopwatch Timer;
+        public bool Stopped => !Timer.IsRunning;
+
+        public int Penalties;
+
+        private TimeSpan? Elapsed;
+
+        public RoundInformation() {
+            Timer = new System.Diagnostics.Stopwatch();
+            Timer.Start();
+        }
+
+        public TimeSpan Duration() {
+            if (Elapsed.HasValue) {
+                return Elapsed.Value;
+            }
+
+            return Timer.Elapsed;
+        }
+
+        public void Stop() {
+            Elapsed = Timer.Elapsed;
+        }
+    }
+}

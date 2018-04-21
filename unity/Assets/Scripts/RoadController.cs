@@ -1,29 +1,61 @@
-﻿using UnityEngine;
+﻿using System.Runtime.ConstrainedExecution;
+using TMPro;
+using UnityEngine;
 
 namespace ldjam41 {
     [RequireComponent(typeof(RoadGenerator))]
     public class RoadController : MonoBehaviour {
         public Transform Car;
 
+        public TextMeshProUGUI WarningMessageDisplay;
+        public float AllowedDistanceToRoad = 5.0f;
+        public float AllowedAngle = 60.0f;
+
+        public bool HighlightRoad;
+        public Transform RoadMarker;
+
         public float DebugDistance;
         public float DebugAngle;
 
         private RoadGenerator RoadGenerator;
+
+        public bool OffTrack => AllowedDistanceToRoad < DebugDistance;
+        public bool WrongDirection => Mathf.Abs(DebugAngle) > AllowedAngle;
 
         private float _lastWaypointChange = -1;
         private LineSegment[] _segments;
 
         private void Start() {
             RoadGenerator = GetComponent<RoadGenerator>();
+            WarningMessageDisplay.text = "";
         }
 
         private void Update() {
+            if (RoadGenerator.LastWaypointHash < 0) {
+                return;
+            }
+
             if (!Mathf.Approximately(_lastWaypointChange, RoadGenerator.LastWaypointHash)) {
                 UpdateSegments();
             }
 
             DebugDistance = CarDistanceToCenterRoad();
             DebugAngle = CarAngle();
+
+            if (HighlightRoad) {
+                var s = GetNearestSegment();
+                RoadMarker.transform.position = s.Start + Vector3.up * 5;
+            }
+
+            if (OffTrack) {
+                WarningMessageDisplay.text = "Off Track!";
+            }
+            else if (WrongDirection) {
+                WarningMessageDisplay.text = "Wrong direction";
+            }
+            else {
+                WarningMessageDisplay.text = "";
+            }
         }
 
         public float CarDistanceToCenterRoad() {
@@ -34,6 +66,7 @@ namespace ldjam41 {
         public float CarAngle() {
             var s = GetNearestSegment();
 
+            Debug.DrawLine(Car.position, Car.position + Car.forward * 100, Color.green);
             return Vector3.SignedAngle(Car.forward, s.Direction, Vector3.up);
         }
 

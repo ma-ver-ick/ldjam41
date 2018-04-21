@@ -17,6 +17,7 @@ namespace ldjam41
         KPH
     }
 
+    [Obsolete("Unused!", true)]
     public class MyCarController : MonoBehaviour
     {
         [SerializeField] private CarDriveType m_CarDriveType = CarDriveType.FourWheelDrive;

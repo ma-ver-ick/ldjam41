@@ -7,7 +7,6 @@ namespace ldjam41 {
     public class RoadController : MonoBehaviour {
         public Transform Car;
 
-        public TextMeshProUGUI WarningMessageDisplay;
         public float AllowedDistanceToRoad = 5.0f;
         public float AllowedAngle = 60.0f;
 
@@ -28,7 +27,6 @@ namespace ldjam41 {
 
         private void Start() {
             RoadGenerator = GetComponent<RoadGenerator>();
-            WarningMessageDisplay.text = "";
         }
 
         private void Update() {
@@ -47,16 +45,6 @@ namespace ldjam41 {
             if (HighlightRoad) {
                 var s = GetNearestSegment(Car.position);
                 RoadMarker.transform.position = s.Start + Vector3.up * 5;
-            }
-
-            if (OffTrack) {
-                WarningMessageDisplay.text = "Off Track!";
-            }
-            else if (WrongDirection) {
-                WarningMessageDisplay.text = "Wrong direction";
-            }
-            else {
-                WarningMessageDisplay.text = "";
             }
         }
 

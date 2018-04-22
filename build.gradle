@@ -1,0 +1,40 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+def repoUrl = "https://nexus.markus-seidl.de/repository/maven-unity/"
+
+// gradle publish -Pversion='latest' -PjenkinsUser='' -PjenkinsPassword=''
+
+if(version == null) version = 'latest'
+
+task archivePlayers(type: Zip) {
+   from "unity/builds/${unityOutput}"
+   include '**/*' //to include contents of a folder present inside Reports directory
+   archiveName "${buildName}.zip"
+   destinationDir(file('.'))
+}
+
+publish.dependsOn(archivePlayers)
+
+publishing {
+    repositories {
+        maven {
+            credentials {
+                username jenkinsUser
+                password jenkinsPassword
+            }
+            url "${repoUrl}"
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'de.markus-seidl.ldjam'
+            artifactId "residentracing.${buildName}"
+
+            artifact "${buildName}.zip"
+        }
+    }
+}

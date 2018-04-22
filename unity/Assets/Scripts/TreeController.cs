@@ -84,7 +84,7 @@ namespace ldjam41 {
             for (var i = Area; i > -Area; i--) {
                 for (var ii = Area; ii > -Area; ii--) {
                     // finish coroutine if it takes longer than 1/60s
-                    if (sw.ElapsedMilliseconds > 15) {
+                    if (sw.ElapsedMilliseconds >= 15) {
                         yield return null;
                         sw.Restart();
                     }
@@ -121,7 +121,7 @@ namespace ldjam41 {
                         continue;
                     }
 
-                    pos += new Vector3(0, TerrainData.GetHeight(x, y), 0);
+                    pos += new Vector3(0, 0, 0); // TerrainData.GetHeight(x, y)
                     var canPlace = true;
                     foreach (var t in Trees) {
                         var distTree = (t.transform.position - pos).sqrMagnitude;

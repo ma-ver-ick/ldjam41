@@ -7,14 +7,18 @@ using UnityStandardAssets.Vehicles.Car;
 namespace ldjam41 {
     // Countdown -> Racing
     public class RacingController : MonoBehaviour {
+        public RoadController RoadController;
+        
+        
         public RacingState CurrentState;
 
         public RacingState StateCountdown;
         public RacingState StateRacing;
-
+        
         public CarUserControl CarUserControl;
         public TextMeshProUGUI InfoDisplay;
         public TextMeshProUGUI TimeDisplay;
+        public TextMeshProUGUI WarningMessageDisplay;
 
         public int Hits;
         public Light LightLeft;
@@ -29,6 +33,7 @@ namespace ldjam41 {
 
             InfoDisplay.text = "";
             TimeDisplay.text = "";
+            WarningMessageDisplay.text = "";
         }
 
         private void Update() {
@@ -122,9 +127,31 @@ namespace ldjam41 {
             Rounds = new List<RoundInformation>();
             CurrentRound = new RoundInformation();
             controller.CarUserControl.enabled = true;
+            
+            controller.WarningMessageDisplay.text = "";
+            controller.InfoDisplay.text = "";
+            controller.TimeDisplay.text = "";
         }
 
         public override void Update(RacingController controller) {
+            UpdateTime(controller);
+
+            UpdateWarnings(controller);
+        }
+
+        private static void UpdateWarnings(RacingController controller) {
+            if (controller.RoadController.OffTrack) {
+                controller.WarningMessageDisplay.text = "Off Track, the Zombies will get you!";
+            }
+            else if (controller.RoadController.WrongDirection) {
+                controller.WarningMessageDisplay.text = "Wrong direction, the Zombies will get you!";
+            }
+            else {
+                controller.WarningMessageDisplay.text = "";
+            }
+        }
+
+        private void UpdateTime(RacingController controller) {
             var currentTime = FloatToRaceTime(CurrentRound.Duration());
 
             var lastTimes = "";

@@ -2408,7 +2408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe1d92086fa495cb2d5036aa7e95ebd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RacingLevel: {fileID: 102900000, guid: 99c9720ab356a0642a771bea13969a05, type: 3}
+  RacingLevel: 1
   TitleScreen: {fileID: 330696154}
   IntroductionScreen: {fileID: 1038698334}
 --- !u!1 &1397950550

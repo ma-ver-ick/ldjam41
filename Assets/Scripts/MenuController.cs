@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 namespace ldjam41 {
     public class MenuController : MonoBehaviour {
 
-        public SceneAsset RacingLevel;
+        public int RacingLevel;
 
         public GameObject TitleScreen;
         public GameObject IntroductionScreen;
@@ -16,7 +16,7 @@ namespace ldjam41 {
         }
 
         public void StartGame() {
-            SceneManager.LoadScene(RacingLevel.name);
+            SceneManager.LoadScene(RacingLevel);
         }
 
         public void ExitGame() {

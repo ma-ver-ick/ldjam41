@@ -7007,12 +7007,12 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: -1
+  m_RenderingPath: 3
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
-  m_AllowMSAA: 1
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 1
   m_OcclusionCulling: 1
@@ -7087,7 +7087,8 @@ AudioSource:
   m_GameObject: {fileID: 1282096680538096}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 243402458859157764, guid: 245ba571ddc5c4b1a91bfe4cd1473915,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: edb46d8cf3c6f42baaa3f77d827daaea, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -7187,7 +7188,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Player: {fileID: 82990663158439938}
   Clips:
-  - {fileID: 8300000, guid: edb46d8cf3c6f42baaa3f77d827daaea, type: 3}
+  - {fileID: 8300000, guid: ce4469e9f16c8463ba85978dcf986874, type: 3}
+  - {fileID: 8300000, guid: 6b4e3f7b87ff945639c5385e192db138, type: 3}
+  - {fileID: 8300000, guid: 757449e7ecfb34dbc888fe0b88796383, type: 3}
+  - {fileID: 8300000, guid: 35264bfed0fa34be999bc72522ed07bc, type: 3}
+  - {fileID: 8300000, guid: 36462413ae4454999a3b1d091120155a, type: 3}
+  - {fileID: 8300000, guid: 1443cafe5f3da46c58b2798447b89c96, type: 3}
+  - {fileID: 8300000, guid: a49ba7d8ba4534e78b4c45c14a64d39f, type: 3}
   FadeoutCurve:
     serializedVersion: 2
     m_Curve:

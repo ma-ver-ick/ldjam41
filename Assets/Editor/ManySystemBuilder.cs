@@ -20,6 +20,7 @@ namespace Builder {
                 var options = new BuildPlayerOptions {
                     locationPathName = locationPathName,
                     scenes = new[] {
+                        "Assets/Scenes/Menu.unity",
                         "Assets/Scenes/RaceTrack01.unity"
                     },
                     options = BuildOptions.None,

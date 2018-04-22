@@ -72,7 +72,7 @@ MonoBehaviour:
     m_Enabled: 0
     m_Settings:
       focusDistance: 10
-      aperture: 5.6
+      aperture: 5.8
       focalLength: 50
       useCameraFov: 0
       kernelSize: 1
@@ -83,7 +83,7 @@ MonoBehaviour:
       sampleCount: 10
       frameBlending: 0
   eyeAdaptation:
-    m_Enabled: 1
+    m_Enabled: 0
     m_Settings:
       lowPercent: 44.24789
       highPercent: 95
@@ -102,7 +102,7 @@ MonoBehaviour:
       bloom:
         intensity: 0.5
         threshold: 1.1
-        softKnee: 0.5
+        softKnee: 0.399
         radius: 4
         antiFlicker: 0
       lensDirt:
@@ -121,7 +121,7 @@ MonoBehaviour:
         neutralWhiteClip: 10
       basic:
         postExposure: 0
-        temperature: 48
+        temperature: 45.1
         tint: 3.9
         hueShift: 0
         saturation: 0.817
@@ -134,9 +134,9 @@ MonoBehaviour:
       colorWheels:
         mode: 1
         log:
-          slope: {r: 1, g: 1, b: 1, a: 0}
-          power: {r: 1, g: 1, b: 1, a: 0}
-          offset: {r: 1, g: 1, b: 1, a: 0}
+          slope: {r: 0.6236776, g: 0.6704082, b: 1, a: 0}
+          power: {r: 0.70212615, g: 0.8023827, b: 1, a: 0}
+          offset: {r: 0.81665146, g: 0.89704984, b: 1, a: 0}
         linear:
           lift: {r: 0, g: 0, b: 0, a: 0}
           gamma: {r: 0, g: 0, b: 0, a: 0}
@@ -305,7 +305,7 @@ MonoBehaviour:
       lut: {fileID: 0}
       contribution: 1
   chromaticAberration:
-    m_Enabled: 0
+    m_Enabled: 1
     m_Settings:
       spectralTexture: {fileID: 0}
       intensity: 0.1
@@ -313,7 +313,7 @@ MonoBehaviour:
     m_Enabled: 1
     m_Settings:
       colored: 1
-      intensity: 0.15
+      intensity: 0.1
       size: 1
       luminanceContribution: 0.5
   vignette:

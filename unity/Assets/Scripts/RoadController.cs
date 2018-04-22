@@ -23,7 +23,7 @@ namespace ldjam41 {
         public bool WrongDirection => Mathf.Abs(DebugAngle) > AllowedAngle;
 
         private float _lastWaypointChange = -1;
-        private LineSegment[] _segments;
+        public LineSegment[] Segments;
 
         private void Start() {
             RoadGenerator = GetComponent<RoadGenerator>();
@@ -43,7 +43,7 @@ namespace ldjam41 {
             DebugAngle = CarAngle();
 
             if (HighlightRoad) {
-                var s = GetNearestSegment();
+                var s = GetNearestSegment(Car.position);
                 RoadMarker.transform.position = s.Start + Vector3.up * 5;
             }
 
@@ -59,23 +59,22 @@ namespace ldjam41 {
         }
 
         public float CarDistanceToCenterRoad() {
-            var s = GetNearestSegment();
+            var s = GetNearestSegment(Car.position);
             return (Car.position - s.Project(Car.position)).magnitude;
         }
 
         public float CarAngle() {
-            var s = GetNearestSegment();
+            var s = GetNearestSegment(Car.position);
 
             Debug.DrawLine(Car.position, Car.position + Car.forward * 100, Color.green);
             return Vector3.SignedAngle(Car.forward, s.Direction, Vector3.up);
         }
 
-        public LineSegment GetNearestSegment() {
-            var carPosition = Car.position;
+        public LineSegment GetNearestSegment(Vector3 carPosition) {
             var ret = float.MaxValue;
-            var retSegment = _segments[0];
-            for (var i = 0; i < _segments.Length; i++) {
-                var s = _segments[i];
+            var retSegment = Segments[0];
+            for (var i = 0; i < Segments.Length; i++) {
+                var s = Segments[i];
 
                 var pp = s.Project(carPosition);
                 var dist = (carPosition - pp).magnitude;
@@ -88,17 +87,53 @@ namespace ldjam41 {
             return retSegment;
         }
 
+        public LineSegment GetNearestSegment(Vector3 carPosition, LineSegment[] segements) {
+            var ret = float.MaxValue;
+            var retSegment = segements[0];
+            for (var i = 0; i < segements.Length; i++) {
+                var s = segements[i];
+
+                var pp = s.Project(carPosition);
+                var dist = (carPosition - pp).magnitude;
+                if (dist < ret) {
+                    retSegment = s;
+                    ret = dist;
+                }
+            }
+
+            return retSegment;
+        }
+        
+        public LineSegment GetNearestSegment(Vector3 carPosition, int startIdx, out int foundIdx) {
+            var ret = float.MaxValue;
+            var retSegment = Segments[0];
+            foundIdx = -1;
+            for (var i = Mathf.Max(startIdx, 0); i < Segments.Length; i++) {
+                var s = Segments[i];
+
+                var pp = s.Project(carPosition);
+                var dist = (carPosition - pp).magnitude;
+                if (dist < ret) {
+                    retSegment = s;
+                    ret = dist;
+                    foundIdx = i;
+                }
+            }
+
+            return retSegment;
+        }
+
         private void UpdateSegments() {
             _lastWaypointChange = RoadGenerator.LastWaypointHash;
 
             // convert waypoints to line segments
             var wps = RoadGenerator.CalculationWaypoints;
-            _segments = new LineSegment[wps.Length];
+            Segments = new LineSegment[wps.Length];
             for (var i = 0; i < wps.Length; i++) {
                 var w = wps[i];
                 var wNext = wps[(i + 1) % wps.Length];
 
-                _segments[i] = new LineSegment(w, wNext);
+                Segments[i] = new LineSegment(w, wNext);
             }
         }
     }

@@ -16,6 +16,11 @@ namespace ldjam41 {
         public TextMeshProUGUI InfoDisplay;
         public TextMeshProUGUI TimeDisplay;
 
+        public int Hits;
+        public Light LightLeft;
+        public Light LightRight;
+        public float[] LightFallOff;
+
         private void Start() {
             CurrentState = StateCountdown = new RacingStateCountdown();
             CurrentState.Start(this);
@@ -30,6 +35,14 @@ namespace ldjam41 {
             CurrentState.Update(this);
         }
 
+        public void SwitchToCountdown() {
+            Hits = 0;
+            UpdateHeadlights(); // Reset
+
+            CurrentState = StateCountdown;
+            CurrentState.Start(this);
+        }
+
         public void SwitchToRacing() {
             CurrentState = StateRacing;
             CurrentState.Start(this);
@@ -37,6 +50,35 @@ namespace ldjam41 {
 
         public void OnStartFinishTrigger() {
             CurrentState.OnStartFinishTrigger(this);
+        }
+
+        public void OnZombieHit() {
+            Hits++;
+
+            UpdateHeadlights();
+        }
+
+        public void UpdateHeadlights() {
+            if (Hits == 0) {
+                LightLeft.enabled = true;
+                LightLeft.intensity = 1.0f;
+                LightRight.enabled = true;
+                LightRight.intensity = 1.0f;
+                return;
+            }
+
+            if (Hits < LightFallOff.Length) {
+                LightLeft.intensity = LightFallOff[Hits];
+                return;
+            }
+
+            if (Hits < LightFallOff.Length + LightFallOff.Length) {
+                LightLeft.enabled = false;
+                LightRight.intensity = LightFallOff[Hits - LightFallOff.Length];
+                return;
+            }
+
+            LightRight.enabled = false;
         }
     }
 
@@ -86,7 +128,7 @@ namespace ldjam41 {
             var currentTime = FloatToRaceTime(CurrentRound.Duration());
 
             var lastTimes = "";
-            for (var i = Rounds.Count-1; i >= Math.Max(Rounds.Count - 3, 0); i--) {
+            for (var i = Rounds.Count - 1; i >= Math.Max(Rounds.Count - 3, 0); i--) {
                 var r = Rounds[i];
                 lastTimes += FloatToRaceTime(r.Duration()) + "\n";
             }

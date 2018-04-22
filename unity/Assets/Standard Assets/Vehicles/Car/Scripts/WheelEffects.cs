@@ -55,14 +55,19 @@ namespace UnityStandardAssets.Vehicles.Car
 
         public void PlayAudio()
         {
-            m_AudioSource.Play();
+            if (m_AudioSource.enabled) {
+                m_AudioSource.Play();
+            }
             PlayingAudio = true;
         }
 
 
         public void StopAudio()
         {
-            m_AudioSource.Stop();
+            if (m_AudioSource.enabled) {
+                m_AudioSource.Stop();
+            }
+
             PlayingAudio = false;
         }
 

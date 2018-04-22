@@ -23,8 +23,15 @@
           <e p="RacingController.cs" t="Include" />
           <e p="RoadController.cs" t="Include" />
           <e p="RoadGenerator.cs" t="Include" />
+          <e p="ShowOnPlay.cs" t="Include" />
           <e p="StartFinishTrigger.cs" t="Include" />
+          <e p="TrapController.cs" t="Include" />
+          <e p="TreeController.cs" t="Include" />
+          <e p="ZombieHitBehaviour.cs" t="Include" />
           <e p="ZombieTrapBehaviour.cs" t="Include" />
+          <e p="ZombieTrapBottomBehaviour.cs" t="Include" />
+          <e p="ZombieTrapCrossingStreetBehaviour.cs" t="Include" />
+          <e p="ZombieTrapDebug.cs" t="Include" />
         </e>
         <e p="Standard Assets" t="Include">
           <e p="Cameras" t="Include">

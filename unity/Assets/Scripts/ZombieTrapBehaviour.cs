@@ -4,9 +4,8 @@ namespace ldjam41 {
     public class ZombieTrapBehaviour : MonoBehaviour {
         public Collider FilterCollider;
         public GameObject Trap;
+        public GameObject ZombieHidePart;
 
-        public Vector3 FromRotation;
-        public Vector3 ToRotation;
         public float Probability;
         public float Speed;
 
@@ -15,13 +14,16 @@ namespace ldjam41 {
         private float StartTime;
         private bool ActiveTrap;
 
+        public Transform Spawn01;
+        public Transform Spawn02;
+
         private void Update() {
             if (!ActiveTrap) {
                 return;
             }
 
             var t = (Time.time - StartTime) * Speed;
-            Trap.transform.localRotation = Quaternion.Euler(Vector3.Lerp(FromRotation, ToRotation, t));
+            TransformZombieForTime(t);
 
             if (t > 1.0f) {
                 ActiveTrap = false;
@@ -40,6 +42,9 @@ namespace ldjam41 {
                 ActiveTrap = true;
                 StartTime = Time.time;
                 ZombieCollider.enabled = true;
+
+                ZombieStartPosition();
+
                 Debug.Log("Vehicle entered - RAISING TRAP " + rnd);
             }
             else {
@@ -47,13 +52,22 @@ namespace ldjam41 {
             }
         }
 
+
         private void OnTriggerExit(Collider other) {
             if (FilterCollider != other) {
                 return;
             }
 
             ZombieCollider.enabled = false;
-            Trap.transform.localRotation = Quaternion.Euler(FromRotation);
+            ResetZombie();
+        }
+
+        public virtual void ZombieStartPosition() { }
+        public virtual void TransformZombieForTime(float t) { }
+        public virtual void ResetZombie() { }
+
+        public void OnZombieHit() {
+            ZombieHidePart.SetActive(false);
         }
     }
 }

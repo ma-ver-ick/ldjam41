@@ -14,12 +14,16 @@ namespace ldjam41 {
 
         public RacingState StateCountdown;
         public RacingState StateRacing;
+        public RacingState StateDead;
+        public RacingState StateWon;
 
         public CarUserControl CarUserControl;
         public CarController CarController;
         public TextMeshProUGUI InfoDisplay;
         public TextMeshProUGUI SpeedDisplay;
         public TextMeshProUGUI TimeDisplay;
+        public TextMeshProUGUI LapDisplay;
+        public BlinkText SpeedDisplayBlink;
         public TextMeshProUGUI WarningMessageDisplay;
 
         public int Hits;
@@ -29,18 +33,40 @@ namespace ldjam41 {
 
         public AnimationCurve WarningIntensity;
         public float SecondsTillDeath = 5.0f;
-        public AudioSource WarningZombie;
+        public RandomizedAudioSource WarningZombie;
+
+        public float MinSpeed = 15.0f;
+
+        public HideUnhideMultiple DeathScreen;
+        public HideUnhideMultiple SuccessScreen;
+
+        public int LapsToWin = 3;
+        public int WarningHits = 6;
 
         private void Start() {
             CurrentState = StateCountdown = new RacingStateCountdown();
             CurrentState.Start(this);
 
             StateRacing = new RacingStateRacing();
+            StateDead = new RacingStateDead();
+            StateWon = new RacingStateWon();
 
+            ForceClear();
+        }
+
+        public void ForceClear() {
             InfoDisplay.text = "";
             TimeDisplay.text = "";
             WarningMessageDisplay.text = "";
             SpeedDisplay.text = "";
+            LapDisplay.text = "";
+
+            DeathScreen.HideAll();
+            SuccessScreen.HideAll();
+
+            StateRacing.ClearHUD(this);
+            StateDead.ClearHUD(this);
+            StateWon.ClearHUD(this);
         }
 
         private void Update() {
@@ -64,9 +90,18 @@ namespace ldjam41 {
             CurrentState.OnStartFinishTrigger(this);
         }
 
+        public void SwitchToDead() {
+            CurrentState = StateDead;
+            CurrentState.Start(this);
+        }
+
+        public void SwitchToWon() {
+            CurrentState = StateWon;
+            CurrentState.Start(this);
+        }
+
         public void OnZombieHit() {
             Hits++;
-
             UpdateHeadlights();
         }
 
@@ -100,6 +135,8 @@ namespace ldjam41 {
         public abstract void Update(RacingController controller);
 
         public virtual void OnStartFinishTrigger(RacingController controller) { }
+
+        public virtual void ClearHUD(RacingController controller) { }
     }
 
     public class RacingStateCountdown : RacingState {
@@ -136,9 +173,13 @@ namespace ldjam41 {
             CurrentRound = new RoundInformation();
             controller.CarUserControl.enabled = true;
 
-            controller.WarningMessageDisplay.text = "";
+            ClearHUD(controller);
+        }
+
+        public void ClearHUD(RacingController controller) {
             controller.InfoDisplay.text = "";
             controller.TimeDisplay.text = "";
+            controller.WarningMessageDisplay.text = "";
             controller.SpeedDisplay.text = "";
         }
 
@@ -149,35 +190,64 @@ namespace ldjam41 {
         }
 
         private void UpdateSpeed(RacingController controller) {
-            controller.SpeedDisplay.text = controller.CarController.CurrentSpeed.ToString("000") + "km/h";
+            controller.SpeedDisplay.text = controller.CarController.CurrentSpeed.ToString("000") + " km/h";
         }
 
         private void UpdateWarnings(RacingController controller) {
             if (controller.RoadController.OffTrack) {
                 StartWarningIfNotRunning(controller);
-                controller.WarningMessageDisplay.text = "Off Track, the Zombies will eat you!";
+                controller.WarningMessageDisplay.text = "Off Track<br>The Zombies will eat you!";
             }
             else if (controller.RoadController.WrongDirection) {
                 StartWarningIfNotRunning(controller);
-                controller.WarningMessageDisplay.text = "Wrong direction, the Zombies will devour you!";
+                controller.WarningMessageDisplay.text = "Wrong direction<br>The Zombies will devour you!";
+            }
+            else if (controller.CarController.CurrentSpeed < controller.MinSpeed) {
+                // prevent stop
+            }
+            else if (controller.Hits > controller.WarningHits) {
+                // prevent stop
             }
             else {
                 controller.WarningMessageDisplay.text = "";
                 StopWarning(controller);
             }
 
+            if (controller.Hits > controller.WarningHits) {
+                StartWarningIfNotRunning(controller);
+            }
+
+            if (controller.CarController.CurrentSpeed < controller.MinSpeed) {
+                controller.SpeedDisplayBlink.StartBlink();
+                StartWarningIfNotRunning(controller);
+            }
+            else {
+                controller.SpeedDisplayBlink.StopBlink();
+            }
+
             if (WarningTime != null && WarningTime.IsRunning) {
                 var a = controller.WarningZombie;
-                a.volume = controller.WarningIntensity.Evaluate(WarningTime.Elapsed.Seconds / controller.SecondsTillDeath);
+                var volume = controller.WarningIntensity.Evaluate(WarningTime.ElapsedMilliseconds / 1000.0f / controller.SecondsTillDeath);
+                a.SetVolume(volume);
+
+                if (volume >= 1.0f) { // time elapsed = dead
+                    ClearHUD(controller);
+                    a.Fadeout();
+                    controller.CarController.Stop();
+                    controller.SwitchToDead();
+                }
             }
         }
 
 
         private void StopWarning(RacingController controller) {
+            if (WarningTime == null) {
+                return;
+            }
+
             WarningTime.Stop();
             var a = controller.WarningZombie;
-            a.loop = false;
-            a.Stop();
+            a.Fadeout();
         }
 
         private void StartWarningIfNotRunning(RacingController controller) {
@@ -193,15 +263,14 @@ namespace ldjam41 {
 
             if (!wasRunning) {
                 // play sound
-
                 var a = controller.WarningZombie;
-                a.loop = true;
-                //a.Play();
-                a.volume = controller.WarningIntensity.Evaluate(0);
+                a.Play(controller.WarningIntensity.Evaluate(0));
             }
         }
 
         private void UpdateTime(RacingController controller) {
+            controller.LapDisplay.text = (Rounds.Count + 1) + " / " + controller.LapsToWin;
+
             var currentTime = FloatToRaceTime(CurrentRound.Duration());
 
             var lastTimes = "";
@@ -229,7 +298,43 @@ namespace ldjam41 {
             CurrentRound.Stop();
             Rounds.Add(CurrentRound);
             CurrentRound = new RoundInformation();
+
+            if (Rounds.Count >= controller.LapsToWin) {
+                controller.WarningZombie.Stop();
+                controller.CarController.Stop();
+                controller.SwitchToWon();
+            }
         }
+    }
+
+    public class RacingStateDead : RacingState {
+        public override void ClearHUD(RacingController controller) {
+            controller.DeathScreen.HideAll();
+            controller.SuccessScreen.HideAll();
+        }
+
+        public override void Start(RacingController controller) {
+            controller.StateRacing.ClearHUD(controller);
+            controller.DeathScreen.ShowAll();
+            controller.CarUserControl.enabled = false;
+        }
+
+        public override void Update(RacingController controller) { }
+    }
+
+    public class RacingStateWon : RacingState {
+        public override void ClearHUD(RacingController controller) {
+            controller.DeathScreen.HideAll();
+            controller.SuccessScreen.HideAll();
+        }
+
+        public override void Start(RacingController controller) {
+            controller.StateRacing.ClearHUD(controller);
+            controller.SuccessScreen.ShowAll();
+            controller.CarUserControl.enabled = false;
+        }
+
+        public override void Update(RacingController controller) { }
     }
 
     public class RoundInformation {

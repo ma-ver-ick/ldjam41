@@ -47,6 +47,8 @@ namespace UnityStandardAssets.Vehicles.Car
         private Rigidbody m_Rigidbody;
         private const float k_ReversingThreshold = 0.01f;
 
+        private CarAudio m_carAudio;
+        
         public bool Skidding { get; private set; }
         public float BrakeInput { get; private set; }
         public float CurrentSteerAngle{ get { return m_SteerAngle; }}
@@ -69,6 +71,8 @@ namespace UnityStandardAssets.Vehicles.Car
 
             m_Rigidbody = GetComponent<Rigidbody>();
             m_CurrentTorque = m_FullTorqueOverAllWheels - (m_TractionControl*m_FullTorqueOverAllWheels);
+
+            m_carAudio = GetComponent<CarAudio>();
         }
 
 
@@ -169,6 +173,18 @@ namespace UnityStandardAssets.Vehicles.Car
             AddDownForce();
             CheckForWheelSpin();
             TractionControl();
+        }
+
+        public void Stop() {
+            m_Rigidbody.velocity = Vector3.zero;
+            m_GearNum = 0;
+
+            m_WheelColliders[0].brakeTorque = 1000.0f;
+            m_WheelColliders[1].brakeTorque = 1000.0f;
+            m_WheelColliders[2].brakeTorque = 1000.0f;
+            m_WheelColliders[3].brakeTorque = 1000.0f;
+
+            m_carAudio.Stop();
         }
 
 

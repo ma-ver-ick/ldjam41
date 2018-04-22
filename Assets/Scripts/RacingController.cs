@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using TMPro;
 using UnityEngine;
+using UnityEngine.PostProcessing;
 using UnityStandardAssets.Vehicles.Car;
 
 namespace ldjam41 {
@@ -23,8 +25,10 @@ namespace ldjam41 {
         public TextMeshProUGUI SpeedDisplay;
         public TextMeshProUGUI TimeDisplay;
         public TextMeshProUGUI LapDisplay;
+        public TextMeshProUGUI NormalInfoDisplay;
         public BlinkText SpeedDisplayBlink;
         public TextMeshProUGUI WarningMessageDisplay;
+
 
         public int Hits;
         public Light LightLeft;
@@ -43,6 +47,8 @@ namespace ldjam41 {
         public int LapsToWin = 3;
         public int WarningHits = 6;
 
+        public PauseMenuManager PauseMenuManager;
+        
         private void Start() {
             CurrentState = StateCountdown = new RacingStateCountdown();
             CurrentState.Start(this);
@@ -60,6 +66,7 @@ namespace ldjam41 {
             WarningMessageDisplay.text = "";
             SpeedDisplay.text = "";
             LapDisplay.text = "";
+            NormalInfoDisplay.text = "";
 
             DeathScreen.HideAll();
             SuccessScreen.HideAll();
@@ -88,6 +95,12 @@ namespace ldjam41 {
 
         public void OnStartFinishTrigger() {
             CurrentState.OnStartFinishTrigger(this);
+        }
+
+        public IEnumerator ClearInfoDisplay() {
+            yield return new WaitForSeconds(1.0f);
+
+            NormalInfoDisplay.text = "";
         }
 
         public void SwitchToDead() {
@@ -166,7 +179,7 @@ namespace ldjam41 {
     public class RacingStateRacing : RacingState {
         public List<RoundInformation> Rounds;
         public RoundInformation CurrentRound;
-        public Stopwatch WarningTime;
+        public PausableStopwatch WarningTime;
 
         public override void Start(RacingController controller) {
             Rounds = new List<RoundInformation>();
@@ -181,12 +194,35 @@ namespace ldjam41 {
             controller.TimeDisplay.text = "";
             controller.WarningMessageDisplay.text = "";
             controller.SpeedDisplay.text = "";
+            controller.NormalInfoDisplay.text = "";
         }
 
         public override void Update(RacingController controller) {
+            UpdateTimerPauseState(controller);            
             UpdateTime(controller);
             UpdateWarnings(controller);
             UpdateSpeed(controller);
+        }
+
+        private void UpdateTimerPauseState(RacingController controller) {
+            if (controller.PauseMenuManager.GamePaused) {
+                if (WarningTime != null && !WarningTime.IsPaused) {
+                    WarningTime.Pause();
+                }
+
+                if (CurrentRound != null && !CurrentRound.Timer.IsPaused) {
+                    CurrentRound.Timer.Pause();
+                }
+            }
+            else {
+                if (WarningTime != null && WarningTime.IsPaused) {
+                    WarningTime.Start();
+                }
+
+                if (CurrentRound != null && CurrentRound.Timer.IsPaused) {
+                    CurrentRound.Timer.Start();
+                }
+            }
         }
 
         private void UpdateSpeed(RacingController controller) {
@@ -253,11 +289,11 @@ namespace ldjam41 {
         private void StartWarningIfNotRunning(RacingController controller) {
             var wasRunning = true;
             if (WarningTime == null) {
-                WarningTime = Stopwatch.StartNew();
+                WarningTime = new PausableStopwatch();
                 wasRunning = false;
             }
             else if (!WarningTime.IsRunning) {
-                WarningTime.Restart();
+                WarningTime.Start();
                 wasRunning = false;
             }
 
@@ -304,6 +340,16 @@ namespace ldjam41 {
                 controller.CarController.Stop();
                 controller.SwitchToWon();
             }
+            else {
+                if (Rounds.Count == controller.LapsToWin - 1) {
+                    controller.NormalInfoDisplay.text = "Final Round";
+                }
+                else {
+                    controller.NormalInfoDisplay.text = "Next Lap";
+                }
+
+                controller.StartCoroutine(controller.ClearInfoDisplay());
+            }
         }
     }
 
@@ -338,7 +384,7 @@ namespace ldjam41 {
     }
 
     public class RoundInformation {
-        private readonly System.Diagnostics.Stopwatch Timer;
+        public readonly PausableStopwatch Timer;
         public bool Stopped => !Timer.IsRunning;
 
         public int Penalties;
@@ -346,20 +392,16 @@ namespace ldjam41 {
         private TimeSpan? Elapsed;
 
         public RoundInformation() {
-            Timer = new System.Diagnostics.Stopwatch();
-            Timer.Start();
+            Timer = new PausableStopwatch();
         }
 
         public TimeSpan Duration() {
-            if (Elapsed.HasValue) {
-                return Elapsed.Value;
-            }
-
             return Timer.Elapsed;
         }
 
         public void Stop() {
             Elapsed = Timer.Elapsed;
+            Timer.Stop();
         }
     }
 }

@@ -184,12 +184,16 @@
         <e p="Scripts" t="Include">
           <e p="BlinkLights.cs" t="Include" />
           <e p="BlinkText.cs" t="Include" />
+          <e p="BrightnessController.cs" t="Include" />
           <e p="CameraController.cs" t="Include" />
           <e p="DisableScriptWhilePlaying.cs" t="Include" />
+          <e p="GodModeBehaviour.cs" t="Include" />
           <e p="HideGameObjectWhilePlaying.cs" t="Include" />
           <e p="HideUnhideMultiple.cs" t="Include" />
           <e p="MenuController.cs" t="Include" />
           <e p="Meshbuilder.cs" t="Include" />
+          <e p="PausableStopwatch.cs" t="Include" />
+          <e p="PauseMenuManager.cs" t="Include" />
           <e p="RacingController.cs" t="Include" />
           <e p="RandomizedAudioSource.cs" t="Include" />
           <e p="RoadController.cs" t="Include" />

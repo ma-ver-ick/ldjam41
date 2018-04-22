@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 using UnityStandardAssets.Vehicles.Car;
@@ -8,15 +9,16 @@ namespace ldjam41 {
     // Countdown -> Racing
     public class RacingController : MonoBehaviour {
         public RoadController RoadController;
-        
-        
+
         public RacingState CurrentState;
 
         public RacingState StateCountdown;
         public RacingState StateRacing;
-        
+
         public CarUserControl CarUserControl;
+        public CarController CarController;
         public TextMeshProUGUI InfoDisplay;
+        public TextMeshProUGUI SpeedDisplay;
         public TextMeshProUGUI TimeDisplay;
         public TextMeshProUGUI WarningMessageDisplay;
 
@@ -24,6 +26,10 @@ namespace ldjam41 {
         public Light LightLeft;
         public Light LightRight;
         public float[] LightFallOff;
+
+        public AnimationCurve WarningIntensity;
+        public float SecondsTillDeath = 5.0f;
+        public AudioSource WarningZombie;
 
         private void Start() {
             CurrentState = StateCountdown = new RacingStateCountdown();
@@ -34,6 +40,7 @@ namespace ldjam41 {
             InfoDisplay.text = "";
             TimeDisplay.text = "";
             WarningMessageDisplay.text = "";
+            SpeedDisplay.text = "";
         }
 
         private void Update() {
@@ -122,32 +129,75 @@ namespace ldjam41 {
     public class RacingStateRacing : RacingState {
         public List<RoundInformation> Rounds;
         public RoundInformation CurrentRound;
+        public Stopwatch WarningTime;
 
         public override void Start(RacingController controller) {
             Rounds = new List<RoundInformation>();
             CurrentRound = new RoundInformation();
             controller.CarUserControl.enabled = true;
-            
+
             controller.WarningMessageDisplay.text = "";
             controller.InfoDisplay.text = "";
             controller.TimeDisplay.text = "";
+            controller.SpeedDisplay.text = "";
         }
 
         public override void Update(RacingController controller) {
             UpdateTime(controller);
-
             UpdateWarnings(controller);
+            UpdateSpeed(controller);
         }
 
-        private static void UpdateWarnings(RacingController controller) {
+        private void UpdateSpeed(RacingController controller) {
+            controller.SpeedDisplay.text = controller.CarController.CurrentSpeed.ToString("000") + "km/h";
+        }
+
+        private void UpdateWarnings(RacingController controller) {
             if (controller.RoadController.OffTrack) {
-                controller.WarningMessageDisplay.text = "Off Track, the Zombies will get you!";
+                StartWarningIfNotRunning(controller);
+                controller.WarningMessageDisplay.text = "Off Track, the Zombies will eat you!";
             }
             else if (controller.RoadController.WrongDirection) {
-                controller.WarningMessageDisplay.text = "Wrong direction, the Zombies will get you!";
+                StartWarningIfNotRunning(controller);
+                controller.WarningMessageDisplay.text = "Wrong direction, the Zombies will devour you!";
             }
             else {
                 controller.WarningMessageDisplay.text = "";
+                StopWarning(controller);
+            }
+
+            if (WarningTime != null && WarningTime.IsRunning) {
+                var a = controller.WarningZombie;
+                a.volume = controller.WarningIntensity.Evaluate(WarningTime.Elapsed.Seconds / controller.SecondsTillDeath);
+            }
+        }
+
+
+        private void StopWarning(RacingController controller) {
+            WarningTime.Stop();
+            var a = controller.WarningZombie;
+            a.loop = false;
+            a.Stop();
+        }
+
+        private void StartWarningIfNotRunning(RacingController controller) {
+            var wasRunning = true;
+            if (WarningTime == null) {
+                WarningTime = Stopwatch.StartNew();
+                wasRunning = false;
+            }
+            else if (!WarningTime.IsRunning) {
+                WarningTime.Restart();
+                wasRunning = false;
+            }
+
+            if (!wasRunning) {
+                // play sound
+
+                var a = controller.WarningZombie;
+                a.loop = true;
+                //a.Play();
+                a.volume = controller.WarningIntensity.Evaluate(0);
             }
         }
 

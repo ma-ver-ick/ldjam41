@@ -28,7 +28,7 @@ node('windows&&unity') {
     stage('Build All Systems') {
 	    try{
 	    	withCredentials([usernamePassword(credentialsId: 'unity-login', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-				bat '''%UNITYEXE% -quit -nographics -silent-crashes -batchmode -projectPath %WORKSPACE%\unity -executeMethod Builder.ManySystemBuilder.build -logFile stdout.txt '''
+				bat '''%UNITYEXE% -quit -nographics -silent-crashes -batchmode -projectPath %WORKSPACE% -executeMethod Builder.ManySystemBuilder.build -logFile stdout.txt '''
 	    	}
 	 	} finally {
 	    	bat '''type stdout.txt '''

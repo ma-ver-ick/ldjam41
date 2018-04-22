@@ -8,7 +8,7 @@ def repoUrl = "https://nexus.markus-seidl.de/repository/maven-unity/"
 if(version == null) version = 'latest'
 
 task archivePlayers(type: Zip) {
-   from "unity/builds/${unityOutput}"
+   from "builds/${unityOutput}"
    include '**/*' //to include contents of a folder present inside Reports directory
    archiveName "${buildName}.zip"
    destinationDir(file('.'))

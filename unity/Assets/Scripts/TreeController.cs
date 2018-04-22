@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace ldjam41 {
@@ -23,6 +25,8 @@ namespace ldjam41 {
 
         private Vector3 LastPlayerPosition = Vector3.negativeInfinity;
 
+        private bool _coroutineRunning;
+
         private void Start() {
             for (var i = 0; i < MaxTrees; i++) {
                 var go = Instantiate(Prefabs[i % Prefabs.Length]);
@@ -32,7 +36,16 @@ namespace ldjam41 {
             }
         }
 
+//        // no one has to see this :( 
+//        List<LineSegment> lastLineSegments = new List<LineSegment>(15);
+//        Dictionary<LineSegment, LineSegment> knownLineSegments = new Dictionary<LineSegment, LineSegment>();
+
         private void Update() {
+            var segments = RoadController.Segments;
+            if (segments == null || segments.Length == 0) {
+                return;
+            }
+
             var player = Player.transform.position;
             if ((LastPlayerPosition - player).sqrMagnitude < Hysteresis) {
                 return;
@@ -40,6 +53,16 @@ namespace ldjam41 {
 
             LastPlayerPosition = player;
 
+            if (!_coroutineRunning) {
+                StartCoroutine(TreeUpdate());
+            }
+        }
+
+        private IEnumerator TreeUpdate() {
+            _coroutineRunning = true;
+            var sw = Stopwatch.StartNew();
+
+            var player = Player.transform.position;
             // deactive any tree thats too far away
             foreach (var t in Trees) {
                 if (!t.activeSelf) {
@@ -51,17 +74,22 @@ namespace ldjam41 {
                 }
             }
 
-            var segments = RoadController.Segments;
-            if (segments == null || segments.Length == 0) {
-                return;
-            }
 
             var x = Mathf.FloorToInt(player.x);
             var y = Mathf.FloorToInt(player.z);
 
+            LineSegment? lastLineSegment = null;
+
             var lastInactiveTree = 0;
             for (var i = Area; i > -Area; i--) {
                 for (var ii = Area; ii > -Area; ii--) {
+                    // finish coroutine if it takes longer than 1/60s
+                    if (sw.ElapsedMilliseconds > 15) {
+                        yield return null;
+                        sw.Restart();
+                    }
+
+
                     var pos = new Vector3(x + i, 0, y + ii);
                     if (Mathf.PerlinNoise(pos.x * PerlinScale.x, pos.z * PerlinScale.y) > 0.5f) {
                         continue;
@@ -71,7 +99,23 @@ namespace ldjam41 {
                         continue;
                     }
 
-                    var s = RoadController.GetNearestSegment(pos);
+                    if (lastLineSegment.HasValue) {
+                        var dist2 = (pos - lastLineSegment.Value.Project(pos)).magnitude;
+                        if (dist2 < RoadClearance) {
+                            continue;
+                        }
+                    }
+
+                    LineSegment? sTemp = null;
+                    sTemp = RoadController.SimpleTree.GetNearestSegment(pos);
+                    if (!sTemp.HasValue) {
+                        continue;
+                    }
+
+                    var s = sTemp.Value;
+                    lastLineSegment = s;
+
+
                     var dist = (pos - s.Project(pos)).magnitude;
                     if (dist < RoadClearance) {
                         continue;
@@ -107,6 +151,9 @@ namespace ldjam41 {
                     go.SetActive(true);
                 }
             }
+
+            // completed;
+            _coroutineRunning = false;
         }
     }
 }

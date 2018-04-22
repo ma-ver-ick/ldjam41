@@ -24,6 +24,7 @@ namespace ldjam41 {
 
         private float _lastWaypointChange = -1;
         public LineSegment[] Segments;
+        public SimpleTree SimpleTree = new SimpleTree();
 
         private void Start() {
             RoadGenerator = GetComponent<RoadGenerator>();
@@ -31,6 +32,7 @@ namespace ldjam41 {
         }
 
         private void Update() {
+            SimpleTree.DebugDraw();
             if (RoadGenerator.LastWaypointHash < 0) {
                 return;
             }
@@ -103,7 +105,7 @@ namespace ldjam41 {
 
             return retSegment;
         }
-        
+
         public LineSegment GetNearestSegment(Vector3 carPosition, int startIdx, out int foundIdx) {
             var ret = float.MaxValue;
             var retSegment = Segments[0];
@@ -125,6 +127,10 @@ namespace ldjam41 {
 
         private void UpdateSegments() {
             _lastWaypointChange = RoadGenerator.LastWaypointHash;
+            SimpleTree.Clear();
+
+            var rot = Quaternion.Euler(0, 90, 0);
+            var width = RoadGenerator.Width;
 
             // convert waypoints to line segments
             var wps = RoadGenerator.CalculationWaypoints;
@@ -133,8 +139,52 @@ namespace ldjam41 {
                 var w = wps[i];
                 var wNext = wps[(i + 1) % wps.Length];
 
-                Segments[i] = new LineSegment(w, wNext);
+                // RECT
+                var dir = (wNext - w).normalized;
+                var left = -(rot * dir);
+
+                var startPosMiddle = w;
+                var startPosLeft = startPosMiddle + left * width;
+                var startPosRight = startPosMiddle + -left * width;
+
+                var endPosMiddle = wNext;
+                var endPosLeft = endPosMiddle + left * width;
+                var endPosRight = endPosMiddle + -left * width;
+
+                var rect = new Bounds();
+                rect.SetMinMax(FindMin(startPosLeft, startPosRight, endPosLeft, endPosRight), FindMax(startPosLeft, startPosRight, endPosLeft, endPosRight));
+
+                Segments[i] = new LineSegment(w, wNext, rect);
+                SimpleTree.Add(Segments[i]);
             }
+        }
+
+        private Vector3 FindMin(params Vector3[] v) {
+            var minX = v[0].x;
+            for (var i = 1; i < v.Length; i++) {
+                minX = Mathf.Min(minX, v[i].x);
+            }
+
+            var minZ = v[0].z;
+            for (var i = 1; i < v.Length; i++) {
+                minZ = Mathf.Min(minZ, v[i].z);
+            }
+
+            return new Vector3(minX, v[0].y - 1, minZ);
+        }
+
+        private Vector3 FindMax(params Vector3[] v) {
+            var maxX = v[0].x;
+            for (var i = 1; i < v.Length; i++) {
+                maxX = Mathf.Max(maxX, v[i].x);
+            }
+
+            var maxZ = v[0].z;
+            for (var i = 1; i < v.Length; i++) {
+                maxZ = Mathf.Max(maxZ, v[i].z);
+            }
+
+            return new Vector3(maxX, v[0].y + 1, maxZ);
         }
     }
 
@@ -143,8 +193,9 @@ namespace ldjam41 {
         public readonly Vector3 End;
         public readonly Vector3 Direction;
         public readonly float tEnd;
+        public readonly Bounds Rect;
 
-        public LineSegment(Vector3 start, Vector3 end) {
+        public LineSegment(Vector3 start, Vector3 end, Bounds rect) {
             Start = start;
             End = end;
 
@@ -152,6 +203,7 @@ namespace ldjam41 {
             Direction = diff.normalized;
 
             tEnd = Mathf.Max(diff.x / Direction.x, Mathf.Max(diff.y / Direction.y, diff.z / Direction.z));
+            Rect = rect;
         }
 
         public Vector3 Project(Vector3 point, bool clamped = true) {

@@ -7,17 +7,18 @@ namespace ldjam41 {
         public AudioSource Sound;
 
         public float DisabledTime = 30.0f;
-        public float LastHitTime = -1;
+        private float _lastHitTime = -1;
 
         private MeshRenderer Display;
 
         private void Start() {
+            _lastHitTime = -1;
             Sound = GetComponent<AudioSource>();
             Display = GetComponent<MeshRenderer>();
         }
 
         private void Update() {
-            if (LastHitTime > 0 && Time.time - LastHitTime < DisabledTime) {
+            if (_lastHitTime > 0 && Time.time - _lastHitTime < DisabledTime) {
                 return;
             }
 
@@ -31,13 +32,13 @@ namespace ldjam41 {
                 return;
             }
 
-            if (LastHitTime > 0 && Time.time - LastHitTime < DisabledTime) {
+            if (_lastHitTime > 0 && Time.time - _lastHitTime < DisabledTime) {
                 return;
             }
 
             RacingController.OnPowerUpCollected();
             Sound.Play();
-            LastHitTime = Time.time;
+            _lastHitTime = Time.time;
             Display.enabled = false;
         }
     }

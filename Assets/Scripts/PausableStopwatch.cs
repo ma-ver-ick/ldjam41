@@ -15,10 +15,11 @@ namespace ldjam41 {
             _stopwatch.Stop();
             IsRunning = false;
             IsPaused = false;
+            _pastDuration = 0;
         }
 
         public void Start() {
-            _stopwatch.Start();
+            _stopwatch.Restart();
             IsRunning = true;
             IsPaused = false;
             _pastDuration = 0;
@@ -28,6 +29,11 @@ namespace ldjam41 {
             _stopwatch.Stop();
             _pastDuration += _stopwatch.ElapsedMilliseconds;
             IsPaused = true;
+        }
+        
+        public void Unpause() {
+            _stopwatch.Start();
+            IsPaused = false;
         }
 
         public bool IsRunning { get; private set; }

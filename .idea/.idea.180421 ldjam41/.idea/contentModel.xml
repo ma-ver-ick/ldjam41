@@ -196,6 +196,7 @@
           <e p="PauseMenuManager.cs" t="Include" />
           <e p="PowerUpBehaviour.cs" t="Include" />
           <e p="PowerUpController.cs" t="Include" />
+          <e p="QualitySwitcher.cs" t="Include" />
           <e p="RacingController.cs" t="Include" />
           <e p="RandomizedAudioSource.cs" t="Include" />
           <e p="RoadController.cs" t="Include" />

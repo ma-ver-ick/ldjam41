@@ -227,11 +227,11 @@ namespace ldjam41 {
             }
             else {
                 if (WarningTime != null && WarningTime.IsPaused) {
-                    WarningTime.Start();
+                    WarningTime.Unpause();
                 }
 
                 if (CurrentRound != null && CurrentRound.Timer.IsPaused) {
-                    CurrentRound.Timer.Start();
+                    CurrentRound.Timer.Unpause();
                 }
             }
         }

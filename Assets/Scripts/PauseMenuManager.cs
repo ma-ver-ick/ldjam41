@@ -6,7 +6,7 @@ namespace ldjam41 {
         public GameObject PauseMenu;
 
         public bool GamePaused;
-        
+
         private void Start() {
             PauseMenu.SetActive(false);
         }
@@ -29,6 +29,7 @@ namespace ldjam41 {
 
         public void Close() {
             PauseMenu.SetActive(false);
+            Time.timeScale = 1.0f;
         }
     }
 }

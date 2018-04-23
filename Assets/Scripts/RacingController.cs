@@ -133,7 +133,7 @@ namespace ldjam41 {
             if (Hits < LightFallOff.Length) {
                 LightLeft.intensity = LightFallOff[Hits];
                 LightLeft.enabled = true;
-                LightRight.intensity = LightFallOff[Hits - LightFallOff.Length];
+                LightRight.intensity = LightFallOff[LightFallOff.Length - 1];
                 LightRight.enabled = true;
                 return;
             }
@@ -282,6 +282,7 @@ namespace ldjam41 {
                     a.Fadeout();
                     controller.CarController.Stop();
                     controller.SwitchToDead();
+                    WarningTime.Stop();
                 }
             }
         }

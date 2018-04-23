@@ -29,6 +29,8 @@ namespace ldjam41 {
         public BlinkText SpeedDisplayBlink;
         public TextMeshProUGUI WarningMessageDisplay;
 
+        public AudioSource FinalRoundAudio;
+        public AudioSource NewBestTime;
 
         public int Hits;
         public Light LightLeft;
@@ -48,7 +50,7 @@ namespace ldjam41 {
         public int WarningHits = 6;
 
         public PauseMenuManager PauseMenuManager;
-        
+
         private void Start() {
             CurrentState = StateCountdown = new RacingStateCountdown();
             CurrentState.Start(this);
@@ -198,7 +200,7 @@ namespace ldjam41 {
         }
 
         public override void Update(RacingController controller) {
-            UpdateTimerPauseState(controller);            
+            UpdateTimerPauseState(controller);
             UpdateTime(controller);
             UpdateWarnings(controller);
             UpdateSpeed(controller);
@@ -333,6 +335,11 @@ namespace ldjam41 {
         public override void OnStartFinishTrigger(RacingController controller) {
             CurrentRound.Stop();
             Rounds.Add(CurrentRound);
+            var roundTime = -1;
+            if (CurrentRound != null) {
+                roundTime = CurrentRound.Duration().Milliseconds;
+            }
+
             CurrentRound = new RoundInformation();
 
             if (Rounds.Count >= controller.LapsToWin) {
@@ -343,9 +350,20 @@ namespace ldjam41 {
             else {
                 if (Rounds.Count == controller.LapsToWin - 1) {
                     controller.NormalInfoDisplay.text = "Final Round";
+                    controller.FinalRoundAudio.Play();
                 }
                 else {
                     controller.NormalInfoDisplay.text = "Next Lap";
+
+                    // is this a new best time?
+                    if (roundTime > 0) {
+                        for (var i = 0; i < Rounds.Count; i++) {
+                            if (Rounds[i].Duration().Milliseconds < roundTime) {
+                                controller.NewBestTime.Play();
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 controller.StartCoroutine(controller.ClearInfoDisplay());

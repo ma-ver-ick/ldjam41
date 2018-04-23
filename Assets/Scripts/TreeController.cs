@@ -78,6 +78,8 @@ namespace ldjam41 {
             var x = Mathf.FloorToInt(player.x);
             var y = Mathf.FloorToInt(player.z);
 
+            var forward = Player.transform.forward;
+
             LineSegment? lastLineSegment = null;
 
             var lastInactiveTree = 0;
@@ -89,13 +91,18 @@ namespace ldjam41 {
                         sw.Restart();
                     }
 
-
                     var pos = new Vector3(x + i, 0, y + ii);
                     if (Mathf.PerlinNoise(pos.x * PerlinScale.x, pos.z * PerlinScale.y) > 0.5f) {
                         continue;
                     }
 
                     if ((pos - player).magnitude > Area) {
+                        continue;
+                    }
+
+                    // wrong direction
+                    var angle = Vector3.SignedAngle(pos - player, forward, Vector3.up);
+                    if (angle < -90 || angle > 90) {
                         continue;
                     }
 

@@ -142,7 +142,7 @@ AudioSource:
     type: 2}
   m_audioClip: {fileID: 8300000, guid: 5db3a64a5639b472090946321e8a83f9, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 0.8
   Loop: 0
   Mute: 0
@@ -240,6 +240,8 @@ MonoBehaviour:
   RacingController: {fileID: 0}
   FilterCollider: {fileID: 0}
   Sound: {fileID: 0}
+  DisabledTime: 30
+  LastHitTime: -1
 --- !u!114 &114887345140958410
 MonoBehaviour:
   m_ObjectHideFlags: 1

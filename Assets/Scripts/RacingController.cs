@@ -133,7 +133,7 @@ namespace ldjam41 {
             if (Hits < LightFallOff.Length) {
                 LightLeft.intensity = LightFallOff[Hits];
                 LightLeft.enabled = true;
-                LightRight.intensity = LightFallOff[LightFallOff.Length - 1];
+                LightRight.intensity = 1.877862f;
                 LightRight.enabled = true;
                 return;
             }

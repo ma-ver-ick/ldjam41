@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace ldjam41 {
@@ -42,6 +43,10 @@ namespace ldjam41 {
             _lastProbability = Probability;
         }
 
+        public void SetProbability(float probability) {
+            Probability = probability;
+        }
+
         private void UpdateTraps() {
             // CleanUp
             if (Traps.Count > 0) {
@@ -62,11 +67,10 @@ namespace ldjam41 {
                 }
 
                 var go = Instantiate(Prefabs[i++ % Prefabs.Length]);
-                go.transform.position = ls.Start + 8*ls.Direction;
+                go.transform.position = ls.Start + 8 * ls.Direction;
                 go.transform.parent = transform;
                 go.transform.rotation = Quaternion.LookRotation(ls.Direction);
                 Traps.Add(go);
-
             }
 
             Zombies = GetComponentsInChildren<ZombieTrapBehaviour>(true);

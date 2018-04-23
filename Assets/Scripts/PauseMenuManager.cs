@@ -17,7 +17,9 @@ namespace ldjam41 {
             }
 
             GamePaused = !GamePaused;
-            PauseMenu.SetActive(GamePaused);
+            if (GamePaused != PauseMenu.activeSelf) {
+                PauseMenu.SetActive(GamePaused);
+            }
 
             if (GamePaused) {
                 Time.timeScale = 0.0f;
@@ -28,8 +30,8 @@ namespace ldjam41 {
         }
 
         public void Close() {
+            GamePaused = false;
             PauseMenu.SetActive(false);
-            Time.timeScale = 1.0f;
         }
     }
 }

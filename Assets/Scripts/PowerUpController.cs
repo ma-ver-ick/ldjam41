@@ -12,6 +12,7 @@ namespace ldjam41 {
                 pup.RacingController = RacingController;
                 pup.FilterCollider = FilterCollider;
             }
+            Debug.LogError("Found " + pups.Length + " PowerUps below me.");
         }
     }
 }

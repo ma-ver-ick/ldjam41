@@ -47,9 +47,6 @@ namespace ldjam41 {
 
                 Debug.Log("Vehicle entered - RAISING TRAP " + rnd);
             }
-            else {
-                Debug.Log("Vehicle entered - not raising trap" + rnd);
-            }
         }
 
 

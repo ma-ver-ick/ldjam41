@@ -124,14 +124,17 @@ namespace ldjam41 {
         public void UpdateHeadlights() {
             if (Hits == 0) {
                 LightLeft.enabled = true;
-                LightLeft.intensity = 1.0f;
+                LightLeft.intensity = 1.877862f;
                 LightRight.enabled = true;
-                LightRight.intensity = 1.0f;
+                LightRight.intensity = 1.877862f;
                 return;
             }
 
             if (Hits < LightFallOff.Length) {
                 LightLeft.intensity = LightFallOff[Hits];
+                LightLeft.enabled = true;
+                LightRight.intensity = LightFallOff[Hits - LightFallOff.Length];
+                LightRight.enabled = true;
                 return;
             }
 
@@ -142,6 +145,11 @@ namespace ldjam41 {
             }
 
             LightRight.enabled = false;
+        }
+
+        public void OnPowerUpCollected() {
+            Hits = Math.Max(0, Hits - 2);
+            UpdateHeadlights();
         }
     }
 

@@ -194,10 +194,13 @@
           <e p="Meshbuilder.cs" t="Include" />
           <e p="PausableStopwatch.cs" t="Include" />
           <e p="PauseMenuManager.cs" t="Include" />
+          <e p="PowerUpBehaviour.cs" t="Include" />
+          <e p="PowerUpController.cs" t="Include" />
           <e p="RacingController.cs" t="Include" />
           <e p="RandomizedAudioSource.cs" t="Include" />
           <e p="RoadController.cs" t="Include" />
           <e p="RoadGenerator.cs" t="Include" />
+          <e p="RotateObject.cs" t="Include" />
           <e p="SceneControls.cs" t="Include" />
           <e p="ScrollText.cs" t="Include" />
           <e p="ShowOnPlay.cs" t="Include" />

@@ -29,7 +29,6 @@ namespace ldjam41 {
             _playing = true;
             _fadeout = false;
             Player.volume = volume;
-            Debug.Log("Play Zombies " + volume);
         }
 
         private void InternalSwitchClipAndPlay() {

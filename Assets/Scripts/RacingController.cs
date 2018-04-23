@@ -31,6 +31,7 @@ namespace ldjam41 {
 
         public AudioSource FinalRoundAudio;
         public AudioSource NewBestTime;
+        public AudioSource ZombieEatingAudio;
 
         public int Hits;
         public Light LightLeft;
@@ -381,6 +382,7 @@ namespace ldjam41 {
             controller.StateRacing.ClearHUD(controller);
             controller.DeathScreen.ShowAll();
             controller.CarUserControl.enabled = false;
+            controller.ZombieEatingAudio.Play();
         }
 
         public override void Update(RacingController controller) { }

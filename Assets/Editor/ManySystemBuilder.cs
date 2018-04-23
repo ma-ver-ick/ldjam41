@@ -17,6 +17,10 @@ namespace Builder {
             foreach (var target in TARGETS) {
                 var locationPathName = "builds/" + ("" + target).ToLower().Replace("standalone", "") + "/residentracing";
 
+                if (target == BuildTarget.StandaloneWindows || target == BuildTarget.StandaloneWindows64) {
+                    locationPathName += ".exe";
+                }
+
                 var options = new BuildPlayerOptions {
                     locationPathName = locationPathName,
                     scenes = new[] {
